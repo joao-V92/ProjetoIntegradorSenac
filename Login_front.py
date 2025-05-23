@@ -16,6 +16,7 @@ cor_fonte_escura = "#444444"
 cor_fonte_clara = "#ebebeb"
 nome_usuario = "Desconhecido"
 
+
 def registrar(page):
     def dlg_clicou(e=None):
         if not dlg_usuarios.value or not dlg_email.value or not dlg_senha.value:
@@ -604,44 +605,146 @@ def diagnostic_front(page):
 
 
 def home_front(page):
-    nome_usuario_campo = ft.Text(
-        nome_usuario, color="#4dd0d5", weight="BOLD", size=14)
-    btn_start_diag = ft.ElevatedButton("NOVO DIAGNÓSTICO", icon="ADD_SHARP", bgcolor="#4dd0d5",
-                                       color=cor_fonte_clara, on_click=lambda _, page_ft=page: diagnostic_front(page_ft))
-    area_ult_diag = ft.ElevatedButton("Ultimo diagnóstico...", bgcolor="#4dd0d5",
-                                      color=cor_fonte_clara, on_click=lambda _: pyperclip.copy(_.control.text))
-    num_emerg = ft.ElevatedButton("EM CASO DE EMERGÊNCIA\n LIGAR 192", icon="LOCAL_HOSPITAL_OUTLINED",
-                                  bgcolor="#e74848", color=cor_fonte_clara, on_click=lambda _, page_ft=page: login_front(page_ft))
-    btn_logout = ft.ElevatedButton("SAIR", icon="EXIT_TO_APP", bgcolor="#e74848",
-                                   color=cor_fonte_clara, on_click=lambda _, page_ft=page: login_front(page_ft))
+    # Cores mais suaves e modernas
+    COR_PRIMARIA = "#2196F3"      # Azul mais suave
+    COR_SECUNDARIA = "#F5F5F5"    # Cinza muito claro
+    COR_SUCESSO = "#4CAF50"       # Verde suave
+    COR_PERIGO = "#F44336"        # Vermelho suave
+    COR_TEXTO_ESCURO = "#212121"  # Quase preto
+    COR_TEXTO_CLARO = "#FFFFFF"   # Branco
+    COR_FUNDO = "#FAFAFA"         # Branco acinzentado
 
+    # Elementos da interface
+    nome_usuario_campo = ft.Text(
+        nome_usuario,
+        color=COR_TEXTO_ESCURO,
+        weight=ft.FontWeight.W_600,
+        size=16
+    )
+
+    btn_start_diag = ft.ElevatedButton(
+        text="Novo Diagnóstico",
+        icon=ft.Icons.ADD_CIRCLE_OUTLINE,
+        bgcolor=COR_PRIMARIA,
+        color=COR_TEXTO_CLARO,
+        height=50,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=12),
+            elevation=2,
+            text_style=ft.TextStyle(size=14, weight=ft.FontWeight.W_500)
+        ),
+        on_click=lambda _, page_ft=page: diagnostic_front(page_ft)
+    )
+
+    area_ult_diag = ft.ElevatedButton(
+        text="Último diagnóstico",
+        icon=ft.Icons.HISTORY,
+        bgcolor=COR_SECUNDARIA,
+        color=COR_TEXTO_ESCURO,
+        height=45,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=12),
+            elevation=1,
+            text_style=ft.TextStyle(size=13, weight=ft.FontWeight.W_400)
+        ),
+        on_click=lambda _: pyperclip.copy(_.control.text)
+    )
+
+    num_emerg = ft.ElevatedButton(
+        text="Emergência - 192",
+        icon=ft.Icons.LOCAL_HOSPITAL_OUTLINED,
+        bgcolor=COR_PERIGO,
+        color=COR_TEXTO_CLARO,
+        height=45,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=12),
+            elevation=2,
+            text_style=ft.TextStyle(size=13, weight=ft.FontWeight.W_500)
+        ),
+        on_click=lambda _, page_ft=page: login_front(page_ft)
+    )
+
+    btn_logout = ft.ElevatedButton(
+        text="Sair",
+        icon=ft.Icons.LOGOUT,
+        bgcolor=COR_SECUNDARIA,
+        color=COR_TEXTO_ESCURO,
+        height=40,
+        style=ft.ButtonStyle(
+            shape=ft.RoundedRectangleBorder(radius=12),
+            elevation=1,
+            text_style=ft.TextStyle(size=12, weight=ft.FontWeight.W_400)
+        ),
+        on_click=lambda _, page_ft=page: login_front(page_ft)
+    )
+
+    # Container principal com design mais limpo
     container_main = ft.Container(
-        bgcolor="#ddeeff",
-        padding=20,
-        height=450,
-        width=500,
+        bgcolor=COR_TEXTO_CLARO,
+        padding=ft.padding.all(24),
+        height=480,
+        width=420,
         alignment=ft.alignment.center,
-        border_radius=10,
+        border_radius=16,
+        shadow=ft.BoxShadow(
+            spread_radius=0,
+            blur_radius=20,
+            color=ft.Colors.with_opacity(0.1, "#000000"),
+            offset=ft.Offset(0, 4)
+        ),
+        border=ft.border.all(1, ft.Colors.with_opacity(0.1, "#000000")),
         content=ft.Column(
-            width=400,
-            height=400,
-            alignment=ft.MainAxisAlignment.SPACE_AROUND,
+            width=360,
+            height=420,
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
-                ft.Row(
-                    controls=[
-                        ft.Icon("PERSON", color="#4dd0d5"),
-                        nome_usuario_campo
-                    ],
-                    spacing=10,
-                    alignment=ft.MainAxisAlignment.START,
+                # Header com informações do usuário
+                ft.Container(
+                    content=ft.Row(
+                        controls=[
+                            ft.Container(
+                                content=ft.Icon(
+                                    ft.Icons.PERSON,
+                                    color=COR_PRIMARIA,
+                                    size=24
+                                ),
+                                bgcolor=ft.Colors.with_opacity(
+                                    0.1, COR_PRIMARIA),
+                                border_radius=20,
+                                padding=8
+                            ),
+                            nome_usuario_campo
+                        ],
+                        spacing=12,
+                        alignment=ft.MainAxisAlignment.START,
+                    ),
+                    padding=ft.padding.only(bottom=16)
                 ),
-                btn_start_diag,
-                area_ult_diag,
-                num_emerg,
-                btn_logout,
+
+                # Botões principais
+                ft.Column(
+                    controls=[
+                        btn_start_diag,
+                        area_ult_diag,
+                    ],
+                    spacing=16,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    width=320
+                ),
+
+                # Botões secundários
+                ft.Column(
+                    controls=[
+                        num_emerg,
+                        btn_logout,
+                    ],
+                    spacing=12,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    width=320
+                ),
             ],
-            spacing=50
+            spacing=24
         ),
     )
 
