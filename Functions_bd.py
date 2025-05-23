@@ -97,9 +97,66 @@ def cadastrar_usuario(usuario, email, senha):
         print(f'Erro no insert: {er}')
         return None
     
+def pega_sintomas(filtro = []):
+    connect_db()
+    try:
+        '''PARAMETROS
+        columns
+        Optional
+        string
+        The columns to retrieve, defaults to *.
+
+        count
+        Optional
+        CountMethod
+        The property to use to get the count of rows returned.
+        '''
+        
+        if filtro:
+            response = (
+                supabase.table("doencas")
+                .select("sintomas, nome_doenca")
+                .contains("sintomas", [i for i in filtro])
+                .execute()
+            )
+            
+        else:
+            response = (
+                supabase.table("doencas")
+                .select("sintomas, nome_doenca")
+                .execute()
+            )
+        
+        res = []
+        tipo = "sintomas"
+        
+        if not response.data:
+            res = ["Sem sintomas disponíveis"]
+        
+        else:
+            if len(response.data) > 3:
+                for registro in response.data:
+                    for doenca in registro["sintomas"]:
+                        res.append(doenca)
+                res = list(dict.fromkeys(res))
+                if filtro: 
+                    for fil in filtro: res.remove(fil)
+
+                tipo = "sintomas"
+
+            else:
+                res = [i["nome_doenca"] for i in response.data]
+                tipo = "nome_doenca"
+
+        return res, tipo
+        
+    except Exception as er:
+        print(f'Erro no select {er}')
+        return []
+
+    
 if __name__ == "__main__":
-    if connect_db():
-        print('Conexão com o banco realizada com sucesso')
-        usuario_logado('rroba@gmail.com','235432')
-    else:
-        print('Erro na conexão com o banco')
+    # lista_sintom = pega_sintomas()
+    lista_sintom, tipo = pega_sintomas(['dor no peito'])
+    print(tipo)
+    print(lista_sintom)
