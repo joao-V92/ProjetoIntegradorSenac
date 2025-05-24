@@ -5,8 +5,8 @@ from supabase.client import ClientOptions
 
 supabase = None
 schema = "public"
-url_api = "https://rawtcrjzfjyexchuzhge.supabase.co"
-key_api = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhd3Rjcmp6Zmp5ZXhjaHV6aGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NjU3NTUsImV4cCI6MjA2MzI0MTc1NX0.TFlTNNmY5L3onBzpbHzA7hYafkeRCvykkUroLnZClrQ"
+url_api = "https://hubmhnxfzksrgcpysjwx.supabase.co"
+key_api = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1Ym1obnhmemtzcmdjcHlzand4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5NjU0NDIsImV4cCI6MjA2MzU0MTQ0Mn0.qIsc9HfD340waUxsCjbukmjErg2B4eVR_Mk09McUCxU"
 
 
 def connect_db():
