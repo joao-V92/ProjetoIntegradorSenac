@@ -43,9 +43,9 @@ def usuario_logado(email_informado, senha_informada):
         '''
         
         response = (
-            supabase.table("usuarios")
-            .select("nome, senha")
-            .eq("email", email_informado) #.eq é o WHERE
+            supabase.table("paciente")
+            .select("nome,email_paciente, senha")
+            .eq("email_paciente", email_informado) #.eq é o WHERE
             .execute()
         )
         
@@ -84,9 +84,9 @@ def cadastrar_usuario(usuario, email, senha):
     
     try:
         
-        dict_data = {"nome": usuario, "email": email, "senha": senha}
+        dict_data = {"nome": usuario, "email_paciente": email, "senha": senha}
         response = (
-            supabase.table("usuarios")
+            supabase.table("paciente")
             .insert(dict_data)
             .execute()
         )
@@ -97,62 +97,53 @@ def cadastrar_usuario(usuario, email, senha):
         print(f'Erro no insert: {er}')
         return None
     
-def pega_sintomas(filtro = []):
+def pega_sintomas(filtro: list[str] = []) -> tuple[list[str], str]:
     connect_db()
+
     try:
-        '''PARAMETROS
-        columns
-        Optional
-        string
-        The columns to retrieve, defaults to *.
-
-        count
-        Optional
-        CountMethod
-        The property to use to get the count of rows returned.
-        '''
         
-        if filtro:
-            response = (
-                supabase.table("doencas")
-                .select("sintomas, nome_doenca")
-                .contains("sintomas", [i for i in filtro])
+        if not filtro:
+            resp = supabase\
+                .table("sintoma")\
+                .select("descricao")\
                 .execute()
-            )
-            
-        else:
-            response = (
-                supabase.table("doencas")
-                .select("sintomas, nome_doenca")
-                .execute()
-            )
-        
-        res = []
-        tipo = "sintomas"
-        
-        if not response.data:
-            res = ["Sem sintomas disponíveis"]
-        
-        else:
-            if len(response.data) > 3:
-                for registro in response.data:
-                    for doenca in registro["sintomas"]:
-                        res.append(doenca)
-                res = list(dict.fromkeys(res))
-                if filtro: 
-                    for fil in filtro: res.remove(fil)
 
-                tipo = "sintomas"
+            descricoes = [row["descricao"] for row in resp.data]
+            return list(dict.fromkeys(descricoes)), "sintomas"
 
-            else:
-                res = [i["nome_doenca"] for i in response.data]
-                tipo = "nome_doenca"
-
-        return res, tipo
         
-    except Exception as er:
-        print(f'Erro no select {er}')
-        return []
+        resp_d = supabase\
+            .table("doenca")\
+            .select("id_doenca")\
+            .in_("descricao_doenca", filtro)\
+            .execute()
+        doenca_ids = [r["id_doenca"] for r in resp_d.data]
+        if not doenca_ids:
+            return ([], "sintomas")
+
+        
+        resp_ds = supabase\
+            .table("doenca_sintoma")\
+            .select("sintoma_id")\
+            .in_("doenca_id", doenca_ids)\
+            .execute()
+        sintoma_ids = [r["sintoma_id"] for r in resp_ds.data]
+        if not sintoma_ids:
+            return ([], "sintomas")
+
+       
+        resp_s = supabase\
+            .table("sintoma")\
+            .select("descricao")\
+            .in_("id_sintoma", sintoma_ids)\
+            .execute()
+        descricoes = [r["descricao"] for r in resp_s.data]
+        #   remover duplicatas
+        return list(dict.fromkeys(descricoes)), "sintomas"
+
+    except Exception as e:
+        print("Erro em pega_sintomas:", e)
+        return ([], "error")
 
     
 if __name__ == "__main__":
