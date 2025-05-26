@@ -784,6 +784,8 @@ def diagnostic_front():
     LISTA_SINTOMAS_EXIBIDOS = []  # Lista dos sintomas que estão sendo exibidos
     
     def atualiza_sintomas(e = None):
+        open_close_loading(True)
+        
         lista_sintoma_doenca, tipo = Functions_bd.pega_sintomas(SINTOMAS_SELECIONADOS)
         
         opcoes.controls.clear()
@@ -967,9 +969,9 @@ def diagnostic_front():
     )
 
     page_flet.controls.clear()
+    open_close_loading(False)
     atualiza_sintomas()
     page_flet.add(principal_row)
-    open_close_loading(False)
 
 
 def main(page: ft.Page):
