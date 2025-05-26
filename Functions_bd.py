@@ -97,65 +97,9 @@ def cadastrar_usuario(usuario, email, senha):
         print(f'Erro no insert: {er}')
         return None
     
-def pega_sintomas(filtro: list[str] = []) -> tuple[list[str], str]:
-    connect_db()
-
-    try:
-        
-        if not filtro:
-            resp = supabase\
-                .table("sintoma")\
-                .select("descricao")\
-                .execute()
-
-            descricoes = [row["descricao"] for row in resp.data]
-            return list(dict.fromkeys(descricoes)), "sintomas"
-
-        
-        resp_d = supabase\
-            .table("doenca")\
-            .select("id_doenca")\
-            .in_("descricao_doenca", filtro)\
-            .execute()
-        doenca_ids = [r["id_doenca"] for r in resp_d.data]
-        if not doenca_ids:
-            return ([], "sintomas")
-
-        
-        resp_ds = supabase\
-            .table("doenca_sintoma")\
-            .select("sintoma_id")\
-            .in_("doenca_id", doenca_ids)\
-            .execute()
-        sintoma_ids = [r["sintoma_id"] for r in resp_ds.data]
-        if not sintoma_ids:
-            return ([], "sintomas")
-
-       
-        resp_s = supabase\
-            .table("sintoma")\
-            .select("descricao")\
-            .in_("id_sintoma", sintoma_ids)\
-            .execute()
-        descricoes = [r["descricao"] for r in resp_s.data]
-        #   remover duplicatas
-        return list(dict.fromkeys(descricoes)), "sintomas"
-
-    except Exception as e:
-        print("Erro em pega_sintomas:", e)
-        return ([], "error")
-
-def test_bd(filtro: list[str] = []) -> tuple[list[dict], str]:
+def pega_sintomas(filtro: list[str] = []) -> tuple[list[dict], str]:
     
-    supabase = create_client(
-        "https://rawtcrjzfjyexchuzhge.supabase.co", 
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhd3Rjcmp6Zmp5ZXhjaHV6aGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NjU3NTUsImV4cCI6MjA2MzI0MTc1NX0.TFlTNNmY5L3onBzpbHzA7hYafkeRCvykkUroLnZClrQ",
-        options=ClientOptions(
-            postgrest_client_timeout=10,
-            storage_client_timeout=10,
-            schema=schema,
-        )
-    )
+    connect_db()
     
     try:
         '''PARAMETROS
@@ -170,18 +114,21 @@ def test_bd(filtro: list[str] = []) -> tuple[list[dict], str]:
         The property to use to get the count of rows returned.
         '''
         
+        # descricao : nome da doença ; doenca : breve descriçao sobre ela ; sintomas : uma str grande com cada elemento sendo separado por virgula
         if filtro:
+            #modelo de pesquisa: "sintomas.ilike.%{filtro}%,sintomas.ilike.%{filtro}%,sintomas.ilike.%{filtro}%"
+            or_filter = ",".join([f"sintomas.ilike.%{f}%" for f in filtro])
             response = (
-                supabase.table("doencas")
-                .select("sintomas, nome_doenca, descricao")
-                .contains("sintomas", [i for i in filtro])
+                supabase.table("doenca")
+                .select("descricao, doenca, sintomas")
+                .or_(or_filter)
                 .execute()
             )
             
         else:
             response = (
-                supabase.table("doencas")
-                .select("sintomas, nome_doenca, descricao")
+                supabase.table("doenca")
+                .select("descricao, doenca, sintomas")
                 .execute()
             )
         
@@ -198,12 +145,13 @@ def test_bd(filtro: list[str] = []) -> tuple[list[dict], str]:
             ]
         
         else:
+            # descricao : nome da doença ; doenca : breve descriçao sobre ela ; sintomas : uma str grande com cada elemento sendo separado por virgula
             
             for registro in response.data:
                     dict_doenca = {
-                        "sintomas": registro["sintomas"],
-                        "nome_doenca": registro["nome_doenca"],
-                        "descricao": registro["descricao"],
+                        "sintomas": registro["sintomas"].split(','),
+                        "nome_doenca": registro["descricao"],
+                        "descricao": registro["doenca"],
                     }
                     
                     if dict_doenca not in sintomas_doencas:
@@ -221,8 +169,10 @@ def test_bd(filtro: list[str] = []) -> tuple[list[dict], str]:
         print(f'Erro no select {er}')
         return [], "sintomas"
     
+    
 if __name__ == "__main__":
-    lista_sintom, tipo = test_bd(['dor no peito'])
+    # lista_sintom, tipo = test_bd(['dor no peito'])
     # lista_sintom, tipo = pega_sintomas(['dor no peito'])
-    print(tipo)
-    print(lista_sintom)
+    lista_sintom = test_bd(['dor articular', 'rigidez', 'perda de flexibilidade', 'inchaço'])
+    for sint in lista_sintom:
+        print(sint)

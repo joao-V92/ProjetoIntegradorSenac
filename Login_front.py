@@ -784,7 +784,7 @@ def diagnostic_front():
     LISTA_SINTOMAS_EXIBIDOS = []  # Lista dos sintomas que estão sendo exibidos
     
     def atualiza_sintomas(e = None):
-        lista_sintoma_doenca, tipo = Functions_bd.test_bd(SINTOMAS_SELECIONADOS)
+        lista_sintoma_doenca, tipo = Functions_bd.pega_sintomas(SINTOMAS_SELECIONADOS)
         
         opcoes.controls.clear()
         LISTA_SINTOMAS_EXIBIDOS.clear()
@@ -822,12 +822,12 @@ def diagnostic_front():
                 opcoes.controls.append(
                     ft.DataTable(
                         columns=[
-                            ft.DataColumn(ft.Text(registro["nome_doenca"])),
+                            ft.DataColumn(ft.Text(registro["nome_doenca"],color=COR_PRIMARIA)),
                         ],
                         rows=[
                             ft.DataRow(
                                 cells=[
-                                    ft.DataCell(ft.Text(registro["descricao"])),
+                                    ft.DataCell(ft.Text(registro["descricao"],color=COR_TEXTO_ESCURO)),
                                 ],
                             ),
                         ],
