@@ -44,7 +44,7 @@ def usuario_logado(email_informado, senha_informada):
         
         response = (
             supabase.table("paciente")
-            .select("nome,email_paciente, senha")
+            .select("nome, email_paciente, senha")
             .eq("email_paciente", email_informado) #.eq é o WHERE
             .execute()
         )
@@ -145,9 +145,84 @@ def pega_sintomas(filtro: list[str] = []) -> tuple[list[str], str]:
         print("Erro em pega_sintomas:", e)
         return ([], "error")
 
+def test_bd(filtro: list[str] = []) -> tuple[list[dict], str]:
+    
+    supabase = create_client(
+        "https://rawtcrjzfjyexchuzhge.supabase.co", 
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhd3Rjcmp6Zmp5ZXhjaHV6aGdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2NjU3NTUsImV4cCI6MjA2MzI0MTc1NX0.TFlTNNmY5L3onBzpbHzA7hYafkeRCvykkUroLnZClrQ",
+        options=ClientOptions(
+            postgrest_client_timeout=10,
+            storage_client_timeout=10,
+            schema=schema,
+        )
+    )
+    
+    try:
+        '''PARAMETROS
+        columns
+        Optional
+        string
+        The columns to retrieve, defaults to *.
+
+        count
+        Optional
+        CountMethod
+        The property to use to get the count of rows returned.
+        '''
+        
+        if filtro:
+            response = (
+                supabase.table("doencas")
+                .select("sintomas, nome_doenca, descricao")
+                .contains("sintomas", [i for i in filtro])
+                .execute()
+            )
+            
+        else:
+            response = (
+                supabase.table("doencas")
+                .select("sintomas, nome_doenca, descricao")
+                .execute()
+            )
+        
+        sintomas_doencas = []
+        tipo = "sintomas"
+        
+        if not response.data:
+            sintomas_doencas = [
+                {
+                    "sintoma": "sem doenças registradas", 
+                    "nome_doenca": "sem doenças registradas", 
+                    "descricao": "sem doenças registradas",
+                }
+            ]
+        
+        else:
+            
+            for registro in response.data:
+                    dict_doenca = {
+                        "sintomas": registro["sintomas"],
+                        "nome_doenca": registro["nome_doenca"],
+                        "descricao": registro["descricao"],
+                    }
+                    
+                    if dict_doenca not in sintomas_doencas:
+                        sintomas_doencas.append(dict_doenca)
+            
+            if len(response.data) > 3:
+                tipo = "sintomas"
+
+            else:
+                tipo = "nome_doenca"
+
+        return sintomas_doencas, tipo
+        
+    except Exception as er:
+        print(f'Erro no select {er}')
+        return [], "sintomas"
     
 if __name__ == "__main__":
-    # lista_sintom = pega_sintomas()
-    lista_sintom, tipo = pega_sintomas(['dor no peito'])
+    lista_sintom, tipo = test_bd(['dor no peito'])
+    # lista_sintom, tipo = pega_sintomas(['dor no peito'])
     print(tipo)
     print(lista_sintom)
